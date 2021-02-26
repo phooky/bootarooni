@@ -1,0 +1,33 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP 74AHC1G125
+D Single Buffer Gate Tri-State, Low-Voltage CMOS
+K Single Gate Buff Tri-State LVC CMOS
+F http://www.ti.com/lit/sg/scyt129e/scyt129e.pdf
+$ENDCMP
+#
+$CMP 74AHCT1G125
+D Single Buffer Gate Tri-State, Low-Voltage CMOS
+K Single Gate Buff Tri-State LVC CMOS
+F http://www.ti.com/lit/sg/scyt129e/scyt129e.pdf
+$ENDCMP
+#
+$CMP 74AUC1G125
+D Single Buffer Gate Tri-State, Low-Voltage CMOS
+K Single Gate Buff Tri-State LVC CMOS
+F http://www.ti.com/lit/sg/scyt129e/scyt129e.pdf
+$ENDCMP
+#
+$CMP 74AUP1G125
+D Single Buffer Gate Tri-State, Low-Voltage CMOS
+K Single Gate Buff Tri-State LVC CMOS
+F http://www.ti.com/lit/sg/scyt129e/scyt129e.pdf
+$ENDCMP
+#
+$CMP 74LVC1G125
+D Single Buffer Gate Tri-State, Low-Voltage CMOS
+K Single Gate Buff Tri-State LVC CMOS
+F http://www.ti.com/lit/sg/scyt129e/scyt129e.pdf
+$ENDCMP
+#
+#End Doc Library
