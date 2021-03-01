@@ -279,17 +279,6 @@ Wire Wire Line
 Text Notes 4550 1100 0    50   ~ 0
 These test points connect to the\ncorresponding test points on \nthe Pi Pico itself.
 $Comp
-L 74xx:74LS07 U1
-U 7 1 6030A1A1
-P 850 6900
-F 0 "U1" H 950 7250 50  0000 L CNN
-F 1 "74LS07" V 1100 6600 50  0000 L CNN
-F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 850 6900 50  0001 C CNN
-F 3 "www.ti.com/lit/ds/symlink/sn74ls07.pdf" H 850 6900 50  0001 C CNN
-	7    850  6900
-	1    0    0    -1  
-$EndComp
-$Comp
 L power:GND #PWR0105
 U 1 1 6031AD41
 P 850 7500
@@ -735,50 +724,6 @@ Text Label 9050 4350 2    50   ~ 0
 D6
 Text Label 9050 4150 2    50   ~ 0
 D7
-$Comp
-L 74xx:74LS07 U1
-U 1 1 60421AF4
-P 8100 3900
-F 0 "U1" H 8300 3850 50  0000 C CNN
-F 1 "74LS07" H 8300 3750 50  0000 C CNN
-F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 8100 3900 50  0001 C CNN
-F 3 "www.ti.com/lit/ds/symlink/sn74ls07.pdf" H 8100 3900 50  0001 C CNN
-	1    8100 3900
-	1    0    0    -1  
-$EndComp
-$Comp
-L 74xx:74LS07 U1
-U 3 1 60423273
-P 8100 4600
-F 0 "U1" H 8300 4550 50  0000 C CNN
-F 1 "74LS07" H 8300 4450 50  0000 C CNN
-F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 8100 4600 50  0001 C CNN
-F 3 "www.ti.com/lit/ds/symlink/sn74ls07.pdf" H 8100 4600 50  0001 C CNN
-	3    8100 4600
-	1    0    0    -1  
-$EndComp
-$Comp
-L 74xx:74LS07 U1
-U 2 1 60434CFD
-P 8100 4250
-F 0 "U1" H 8300 4200 50  0000 C CNN
-F 1 "74LS07" H 8300 4100 50  0000 C CNN
-F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 8100 4250 50  0001 C CNN
-F 3 "www.ti.com/lit/ds/symlink/sn74ls07.pdf" H 8100 4250 50  0001 C CNN
-	2    8100 4250
-	1    0    0    -1  
-$EndComp
-$Comp
-L 74xx:74LS07 U1
-U 4 1 60435ED0
-P 8100 4950
-F 0 "U1" H 8300 4900 50  0000 C CNN
-F 1 "74LS07" H 8300 4800 50  0000 C CNN
-F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 8100 4950 50  0001 C CNN
-F 3 "www.ti.com/lit/ds/symlink/sn74ls07.pdf" H 8100 4950 50  0001 C CNN
-	4    8100 4950
-	1    0    0    -1  
-$EndComp
 Text Label 8400 3900 0    50   ~ 0
 ~NMI~
 Text Label 8400 4250 0    50   ~ 0
@@ -1047,19 +992,6 @@ Wire Wire Line
 	9050 1450 10650 1450
 Wire Wire Line
 	10650 1450 10650 1350
-$Comp
-L power:+5V #PWR01
-U 1 1 604CC8F0
-P 7450 3150
-F 0 "#PWR01" H 7450 3000 50  0001 C CNN
-F 1 "+5V" H 7465 3323 50  0000 C CNN
-F 2 "" H 7450 3150 50  0001 C CNN
-F 3 "" H 7450 3150 50  0001 C CNN
-	1    7450 3150
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	7450 3150 7450 3200
 Wire Wire Line
 	7800 3900 7450 3900
 Wire Wire Line
@@ -1068,17 +1000,9 @@ Wire Wire Line
 	7800 4600 7650 4600
 Wire Wire Line
 	7800 4950 7750 4950
-Wire Wire Line
-	7450 3650 7450 3900
 Connection ~ 7450 3900
-Wire Wire Line
-	7550 3650 7550 4250
 Connection ~ 7550 4250
-Wire Wire Line
-	7650 3650 7650 4600
 Connection ~ 7650 4600
-Wire Wire Line
-	7750 3650 7750 4950
 Connection ~ 7750 4950
 $Comp
 L Device:C C2
@@ -1128,12 +1052,10 @@ Wire Wire Line
 	850  6400 1350 6400
 Wire Wire Line
 	2750 6400 2750 6550
-Connection ~ 850  6400
 Wire Wire Line
 	2750 6850 2750 7400
 Wire Wire Line
 	2750 7400 2400 7400
-Connection ~ 850  7400
 Wire Wire Line
 	1700 6550 1700 6400
 Connection ~ 1700 6400
@@ -1214,28 +1136,6 @@ Wire Wire Line
 	7550 4250 7550 5150
 Wire Wire Line
 	7450 5150 7450 3900
-$Comp
-L Device:R_Pack04 RN1
-U 1 1 6042F432
-P 7650 3450
-F 0 "RN1" H 7838 3496 50  0000 L CNN
-F 1 "R_Pack04" H 7838 3405 50  0000 L CNN
-F 2 "" V 7925 3450 50  0001 C CNN
-F 3 "~" H 7650 3450 50  0001 C CNN
-	1    7650 3450
-	1    0    0    -1  
-$EndComp
-$Comp
-L Device:R_Pack04 RN2
-U 1 1 604348FC
-P 7650 5350
-F 0 "RN2" H 7838 5396 50  0000 L CNN
-F 1 "R_Pack04" H 7838 5305 50  0000 L CNN
-F 2 "" V 7925 5350 50  0001 C CNN
-F 3 "~" H 7650 5350 50  0001 C CNN
-	1    7650 5350
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	7650 5550 7650 5600
 Wire Wire Line
@@ -1253,21 +1153,89 @@ Wire Wire Line
 Connection ~ 7550 5600
 Wire Wire Line
 	7550 5600 7450 5600
-Wire Wire Line
-	7450 3200 7550 3200
-Wire Wire Line
-	7750 3200 7750 3250
-Connection ~ 7450 3200
-Wire Wire Line
-	7450 3200 7450 3250
-Wire Wire Line
-	7550 3200 7550 3250
-Connection ~ 7550 3200
-Wire Wire Line
-	7550 3200 7650 3200
-Wire Wire Line
-	7650 3200 7650 3250
-Connection ~ 7650 3200
-Wire Wire Line
-	7650 3200 7750 3200
+$Comp
+L 74xx:74LS05 U1
+U 7 1 6048CAD2
+P 850 6900
+F 0 "U1" H 1080 6946 50  0000 L CNN
+F 1 "74LS05" H 1080 6855 50  0000 L CNN
+F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 850 6900 50  0001 C CNN
+F 3 "http://www.ti.com/lit/gpn/sn74LS05" H 850 6900 50  0001 C CNN
+	7    850  6900
+	1    0    0    -1  
+$EndComp
+Connection ~ 850  6400
+Connection ~ 850  7400
+$Comp
+L 74xx:74LS05 U1
+U 1 1 6048E273
+P 8100 3900
+F 0 "U1" H 8100 4217 50  0000 C CNN
+F 1 "74LS05" H 8100 4126 50  0000 C CNN
+F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 8100 3900 50  0001 C CNN
+F 3 "http://www.ti.com/lit/gpn/sn74LS05" H 8100 3900 50  0001 C CNN
+	1    8100 3900
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74xx:74LS05 U1
+U 2 1 6048EF63
+P 8100 4250
+F 0 "U1" H 8100 4567 50  0000 C CNN
+F 1 "74LS05" H 8100 4476 50  0000 C CNN
+F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 8100 4250 50  0001 C CNN
+F 3 "http://www.ti.com/lit/gpn/sn74LS05" H 8100 4250 50  0001 C CNN
+	2    8100 4250
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74xx:74LS05 U1
+U 3 1 6048FD1A
+P 8100 4600
+F 0 "U1" H 8100 4917 50  0000 C CNN
+F 1 "74LS05" H 8100 4826 50  0000 C CNN
+F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 8100 4600 50  0001 C CNN
+F 3 "http://www.ti.com/lit/gpn/sn74LS05" H 8100 4600 50  0001 C CNN
+	3    8100 4600
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74xx:74LS05 U1
+U 4 1 60490D69
+P 8100 4950
+F 0 "U1" H 8100 5267 50  0000 C CNN
+F 1 "74LS05" H 8100 5176 50  0000 C CNN
+F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 8100 4950 50  0001 C CNN
+F 3 "http://www.ti.com/lit/gpn/sn74LS05" H 8100 4950 50  0001 C CNN
+	4    8100 4950
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_Pack04 RN1
+U 1 1 604348FC
+P 7650 5350
+F 0 "RN1" H 7838 5396 50  0000 L CNN
+F 1 "47K" H 7838 5305 50  0000 L CNN
+F 2 "bootarooni:SOIC-8" V 7925 5350 50  0001 C CNN
+F 3 "~" H 7650 5350 50  0001 C CNN
+	1    7650 5350
+	1    0    0    -1  
+$EndComp
+Text Label 1950 1050 0    50   ~ 0
+EXT_V
+Text Label 1650 2350 0    50   ~ 0
+EXT_GND
+NoConn ~ 3800 6800
+NoConn ~ 3800 6700
+NoConn ~ 3800 6600
+Text Label 3800 6500 2    50   ~ 0
+P_~STROBE~
+Text Label 3800 6400 2    50   ~ 0
+P_R_~W~
+Text Label 3800 6300 2    50   ~ 0
+P_ϕ1
+Text Label 3800 6200 2    50   ~ 0
+P_~DEVSEL~
+Text Label 3800 6100 2    50   ~ 0
+P_~IOSEL~
 $EndSCHEMATC

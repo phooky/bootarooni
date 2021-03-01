@@ -1,4 +1,5 @@
 (fp_lib_table
   (lib (name MCU_RaspberryPi_and_Boards)(type KiCad)(uri /home/phooky/Repo/phooky/RP_Silicon_KiCad/KiCadLibraries/MCU_RaspberryPi_and_Boards.pretty)(options "")(descr ""))
   (lib (name Apple2_bus)(type KiCad)(uri ${KIPRJMOD}/pico_libs/Apple2_bus.pretty)(options "")(descr ""))
+  (lib (name bootarooni)(type KiCad)(uri ${KIPRJMOD}/bootarooni.pretty)(options "")(descr ""))
 )
