@@ -1542,4 +1542,26 @@ F 3 "" H 2000 4450 50  0001 C CNN
 	1    2000 4450
 	1    0    0    -1  
 $EndComp
+$Comp
+L Mechanical:MountingHole H1
+U 1 1 6091C6CA
+P 700 700
+F 0 "H1" H 800 746 50  0000 L CNN
+F 1 "top mount" H 800 655 50  0000 L CNN
+F 2 "MountingHole:MountingHole_3.2mm_M3" H 700 700 50  0001 C CNN
+F 3 "~" H 700 700 50  0001 C CNN
+	1    700  700 
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole H2
+U 1 1 6091C9F0
+P 700 900
+F 0 "H2" H 800 946 50  0000 L CNN
+F 1 "top mount" H 800 855 50  0000 L CNN
+F 2 "MountingHole:MountingHole_3.2mm_M3" H 700 900 50  0001 C CNN
+F 3 "~" H 700 900 50  0001 C CNN
+	1    700  900 
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC
