@@ -2,4 +2,5 @@
   (lib (name Apple2_bus)(type Legacy)(uri ${KIPRJMOD}/pico_libs/Apple2_bus.lib)(options "")(descr ""))
   (lib (name MCU_RaspberryPi_and_Boards)(type Legacy)(uri /home/phooky/Repo/phooky/RP_Silicon_KiCad/KiCadLibraries/MCU_RaspberryPi_and_Boards.lib)(options "")(descr ""))
   (lib (name extras)(type Legacy)(uri ${KIPRJMOD}/extras.lib)(options "")(descr ""))
+  (lib (name bootarooni-rescue)(type Legacy)(uri ${KIPRJMOD}/bootarooni-rescue.lib)(options "")(descr ""))
 )

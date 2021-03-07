@@ -210,9 +210,9 @@ Wire Wire Line
 	1650 1750 1750 1750
 NoConn ~ 1750 1750
 Text Label 4800 1550 0    50   ~ 0
-USB_DP
+USB_D+
 Text Label 4800 1650 0    50   ~ 0
-USB_DM
+USB_D-
 $Comp
 L power:GND #PWR0101
 U 1 1 602D4981
@@ -944,21 +944,10 @@ F 3 "~" H 8900 1950 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	8700 1950 9050 1950
-$Comp
-L MCU_RaspberryPi_and_Boards:Pico_USB U2
-U 1 1 6040CDC5
-P 2000 4450
-F 0 "U2" H 2400 5600 50  0000 C CNN
-F 1 "Pico_USB" H 1550 5600 50  0000 C CNN
-F 2 "MCU_RaspberryPi_and_Boards:RPi_Pico_USB_SMD_TH" V 2000 4450 50  0001 C CNN
-F 3 "" H 2000 4450 50  0001 C CNN
-	1    2000 4450
-	1    0    0    -1  
-$EndComp
 Text Label 1950 3300 1    50   ~ 0
-USB_DP
+USB_D+
 Text Label 2050 3300 1    50   ~ 0
-USB_DM
+USB_D-
 Wire Wire Line
 	9050 1150 9050 1250
 Wire Wire Line
@@ -1432,7 +1421,7 @@ F 1 "470R" V 2974 4400 50  0000 C CNN
 F 2 "bootarooni:SOIC-8" V 3575 4400 50  0001 C CNN
 F 3 "~" H 3300 4400 50  0001 C CNN
 	1    3300 4400
-	0    1    1    0   
+	0    -1   1    0   
 $EndComp
 Wire Wire Line
 	3100 4200 3100 4100
@@ -1542,4 +1531,15 @@ Wire Wire Line
 Wire Wire Line
 	4100 4050 4100 4250
 Connection ~ 4100 4250
+$Comp
+L MCU_RaspberryPi_and_Boards:Pico_USB U2
+U 1 1 608C304D
+P 2000 4450
+F 0 "U2" H 2000 5781 50  0000 C CNN
+F 1 "Pico_USB" H 2000 5690 50  0000 C CNN
+F 2 "MCU_RaspberryPi_and_Boards:RPi_Pico_USB_SMD_TH" V 2000 4450 50  0001 C CNN
+F 3 "" H 2000 4450 50  0001 C CNN
+	1    2000 4450
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC
