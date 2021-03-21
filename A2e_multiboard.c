@@ -54,13 +54,11 @@ static inline void init_pin(pin_t pin, uint value) {
 }
 
 void core1() {
-    uint count = 0;
     while (true) {
-        count++;
+        uint32_t leds = multicore_fifo_pop_blocking();
         for (size_t i = 0; i < LED_PINS_COUNT; i++) {
-            gpio_put(LED_PINS[i], (count & (1<<i))?1:0);
+            gpio_put(LED_PINS[i], (leds & (1<<i))?1:0);
         }
-        sleep_ms(650);
     }
 }
 
@@ -91,6 +89,7 @@ int main()
         } else { c = -1; }
         if (c >= 0) {
             printf("Setting LEDs to %x.\n",c);
+            multicore_fifo_push_blocking(c);
         } else {
             printf("Unrecognized hex digit.\n");
         }
