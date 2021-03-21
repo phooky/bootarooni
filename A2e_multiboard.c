@@ -46,7 +46,7 @@ const pin_t LED_PINS[] = {
 
 const size_t LED_PINS_COUNT = ARRLEN(LED_PINS);
 
-inline static void init_pin(pin_t pin, uint value) {
+static inline void init_pin(pin_t pin, uint value) {
     gpio_init(pin); 
     gpio_set_dir(pin, GPIO_OUT);
     gpio_put(pin, value);
