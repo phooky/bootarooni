@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
+#include "pico/multicore.h"
 
 #define ARRLEN(arr) (sizeof(arr)/sizeof(arr[0]))
 
@@ -52,6 +53,17 @@ static inline void init_pin(pin_t pin, uint value) {
     gpio_put(pin, value);
 }
 
+void core1() {
+    uint count = 0;
+    while (true) {
+        count++;
+        for (size_t i = 0; i < LED_PINS_COUNT; i++) {
+            gpio_put(LED_PINS[i], (count & (1<<i))?1:0);
+        }
+        sleep_ms(650);
+    }
+}
+
 int main()
 {
     stdio_init_all();
@@ -69,12 +81,18 @@ int main()
     init_pin(PIN_NMI,0);
 
     puts("Hello, world!");
-    uint count = 0;
+    multicore_launch_core1(core1);
     while (true) {
-        printf("Multiboard.\n");sleep_ms(800);
-        count++;
-        for (size_t i = 0; i < LED_PINS_COUNT; i++) {
-            gpio_put(LED_PINS[i], (count & (1<<i))?1:0);
+        int c = getchar();
+        if (c >= '0' && c <= '9') {
+            c -= '0';
+        } else if (c >= 'a' && c <= 'f') {
+            c -= 'a' - 10;
+        } else { c = -1; }
+        if (c >= 0) {
+            printf("Setting LEDs to %x.\n",c);
+        } else {
+            printf("Unrecognized hex digit.\n");
         }
     }
     return 0;
