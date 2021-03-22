@@ -48,10 +48,37 @@ const pin_t LED_PINS[] = {
 
 const size_t LED_PINS_COUNT = ARRLEN(LED_PINS);
 
+/// Initialize a GPIO pin as an output with the given level.
 static inline void init_pin(pin_t pin, uint value) {
     gpio_init(pin); 
     gpio_set_dir(pin, GPIO_OUT);
     gpio_put(pin, value);
+}
+
+void initialize_gpio() {
+    // These pins need to be set immediately; floating or incorrect values
+    // will prevent the Apple IIe from booting.
+    init_pin(PIN_ADDR_OE,1);
+    init_pin(PIN_DATA_OE,1);
+    init_pin(PIN_RDY,0);
+    init_pin(PIN_DMA,0);
+    init_pin(PIN_IRQ,0);
+    init_pin(PIN_NMI,0);
+
+    // Now we can initialize the rest of the IO pins.
+    const struct {pin_t pin; bool out;} pins[] = {
+        { PIN_DATA_IN, GPIO_OUT },
+        { PIN_DATA_CLK, GPIO_OUT },
+        { PIN_LED_0, GPIO_OUT },
+        { PIN_LED_1, GPIO_OUT },
+        { PIN_LED_2, GPIO_OUT },
+        { PIN_LED_3, GPIO_OUT },
+    };
+
+    for (size_t i = 0; i < ARRLEN(pins); i++) {
+        gpio_init(pins[i].pin);
+        gpio_set_dir(pins[i].pin, pins[i].out);
+    }
 }
 
 void core1() {
@@ -66,19 +93,7 @@ void core1() {
 int main()
 {
     stdio_init_all();
-
-    for (size_t i = 0; i < LED_PINS_COUNT; i++) {
-        gpio_init(LED_PINS[i]);
-        gpio_set_dir(LED_PINS[i], GPIO_OUT);
-    }
-
-    init_pin(6,1);
-    init_pin(2,1);
-    init_pin(PIN_RDY,0);
-    init_pin(PIN_DMA,0);
-    init_pin(PIN_IRQ,0);
-    init_pin(PIN_NMI,0);
-
+    initialize_gpio();
     puts("Hello, world!");
     multicore_launch_core1(core1);
     while (true) {
