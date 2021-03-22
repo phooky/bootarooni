@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "pico/multicore.h"
+#include "pico/bootrom.h"
 
 #define ARRLEN(arr) (sizeof(arr)/sizeof(arr[0]))
 
@@ -86,6 +87,9 @@ int main()
             c -= '0';
         } else if (c >= 'a' && c <= 'f') {
             c -= 'a' - 10;
+        } else if (c == 'R') {
+            c = -1;
+            reset_usb_boot(0,0);
         } else { c = -1; }
         if (c >= 0) {
             printf("Setting LEDs to %x.\n",c);
