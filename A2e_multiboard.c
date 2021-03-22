@@ -64,21 +64,12 @@ void initialize_gpio() {
     init_pin(PIN_DMA,0);
     init_pin(PIN_IRQ,0);
     init_pin(PIN_NMI,0);
+    // Set up LED pins.
+    init_pin(PIN_LED_0,0);
+    init_pin(PIN_LED_1,0);
+    init_pin(PIN_LED_2,0);
+    init_pin(PIN_LED_3,0);
 
-    // Now we can initialize the rest of the IO pins.
-    const struct {pin_t pin; bool out;} pins[] = {
-        { PIN_DATA_IN, GPIO_OUT },
-        { PIN_DATA_CLK, GPIO_OUT },
-        { PIN_LED_0, GPIO_OUT },
-        { PIN_LED_1, GPIO_OUT },
-        { PIN_LED_2, GPIO_OUT },
-        { PIN_LED_3, GPIO_OUT },
-    };
-
-    for (size_t i = 0; i < ARRLEN(pins); i++) {
-        gpio_init(pins[i].pin);
-        gpio_set_dir(pins[i].pin, pins[i].out);
-    }
 }
 
 void core1() {
