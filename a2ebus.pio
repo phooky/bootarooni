@@ -1,0 +1,34 @@
+.program a2bus
+
+
+// All inputs are in terms of absolute GPIO
+.define PHI1 11
+
+// In: size 2
+// AO_OUT AE_OUT
+// Base: 14, count: 2
+
+// Out: size 1
+// ADDR_FN
+// Base: 7, count: 1
+
+// Side set: size 1 (1 enable bit)
+// ADDR_CLK 
+// Side base: 5, size count: 1
+// We CAN afford the spare bit for optional sideset
+.side_set 1 opt
+
+loop:
+    // Set in parallel load mode, prep for load
+    SET pins, 1 side 0
+    SET X, 8
+    // wait for Q1 to go high
+    // 300 nsec later address is valid; set in shift out mode
+    WAIT 1 gpio PHI1 [7]
+    SET pins, 1 side 1 // high transition to load register
+    SET pins, 0 // shift register mode
+read:
+    IN pins, 2 side 0
+    JMP X-- read side 1
+    PUSH
+

@@ -27,8 +27,14 @@ pico_set_program_version(A2e_multiboard "0.1")
 pico_enable_stdio_uart(A2e_multiboard 0)
 pico_enable_stdio_usb(A2e_multiboard 1)
 
+pico_generate_pio_header(A2e_multiboard ${CMAKE_CURRENT_LIST_DIR}/a2ebus.pio)
+
 # Add the standard library to the build
-target_link_libraries(A2e_multiboard pico_stdlib pico_multicore)
+target_link_libraries(A2e_multiboard 
+    pico_stdlib 
+    pico_multicore
+    hardware_pio
+    )
 
 pico_add_extra_outputs(A2e_multiboard)
 
