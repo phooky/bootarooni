@@ -1,4 +1,4 @@
-.program a2bus
+.program addrbus 
 
 
 // All inputs are in terms of absolute GPIO
@@ -18,6 +18,8 @@
 // We CAN afford the spare bit for optional sideset
 .side_set 1 opt
 
+// Jump pin: DEVSEL (pin 10)
+
 loop:
     // Set in parallel load mode, prep for load
     SET pins, 1 side 0
@@ -25,10 +27,31 @@ loop:
     // wait for Q1 to go high
     // 300 nsec later address is valid; set in shift out mode
     WAIT 1 gpio PHI1 [7]
-    SET pins, 1 side 1 // high transition to load register
+    JMP pin skip side 1 // ignore if devsel is high
     SET pins, 0 // shift register mode
 read:
     IN pins, 2 side 0
     JMP X-- read side 1
     PUSH
+skip:
+    WAIT 0 gpio PHI1
+
+
+% c-sdk {
+static inline void setup_addrbus(PIO pio, uint sm, uint offset) {
+    pio_sm_config conf = addrbus_program_get_default_config(offset);
+    sm_config_set_out_pins(&conf, 7, 1);
+    sm_config_set_set_pins(&conf, 7, 1);
+    sm_config_set_in_pins(&conf, 14);
+    sm_config_set_sideset_pins(&conf, 5);
+    sm_config_set_jmp_pin(&conf, 10);
+    sm_config_set_clkdiv(&conf, 1.0);
+    pio_gpio_init(pio, 7);
+    pio_gpio_init(pio, 5);
+    pio_sm_set_pindirs_with_mask(pio, sm, 1<<7 | 1<< 5, 1<<7 | 1<<5);
+    pio_sm_init(pio, sm, offset, &conf);
+    pio_sm_set_enabled(pio, sm, true);
+}
+
+%}
 

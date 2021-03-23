@@ -2,6 +2,7 @@
 #include "pico/stdlib.h"
 #include "pico/multicore.h"
 #include "pico/bootrom.h"
+#include "a2ebus.pio.h"
 
 #define ARRLEN(arr) (sizeof(arr)/sizeof(arr[0]))
 
@@ -79,6 +80,13 @@ void core1() {
             gpio_put(LED_PINS[i], (leds & (1<<i))?1:0);
         }
     }
+}
+
+void initialize_pio() {
+    PIO pio = pio0;
+    uint sm = 0;
+    uint offset = pio_add_program(pio, &addrbus_program);
+    setup_addrbus(pio, sm, offset);
 }
 
 int main()
