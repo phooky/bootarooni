@@ -49,7 +49,7 @@ skip:
 
 
 % c-sdk {
-static inline void setup_addrbus(PIO pio, uint sm, uint offset) {
+static inline void init_addrbus(PIO pio, uint sm, uint offset) {
     pio_sm_config conf = addrbus_program_get_default_config(offset);
     sm_config_set_out_pins(&conf, 7, 1);
     sm_config_set_set_pins(&conf, 7, 1);

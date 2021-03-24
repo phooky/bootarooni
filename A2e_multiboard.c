@@ -74,19 +74,17 @@ void initialize_gpio() {
 }
 
 void core1() {
-    while (true) {
-        uint32_t leds = multicore_fifo_pop_blocking();
-        for (size_t i = 0; i < LED_PINS_COUNT; i++) {
-            gpio_put(LED_PINS[i], (leds & (1<<i))?1:0);
-        }
-    }
-}
-
-void initialize_pio() {
     PIO pio = pio0;
     uint sm = 0;
     uint offset = pio_add_program(pio, &addrbus_program);
-    setup_addrbus(pio, sm, offset);
+    io_ro_32 *addr = &pio->rxf[sm];
+    init_addrbus(pio, sm, offset);
+    while (true) {
+        while (pio_sm_is_rx_fifo_empty(pio, sm))
+            tight_loop_contents();
+        multicore_fifo_push_blocking(*addr);
+    }
+
 }
 
 int main()
@@ -96,20 +94,28 @@ int main()
     puts("Hello, world!");
     multicore_launch_core1(core1);
     while (true) {
-        int c = getchar();
-        if (c >= '0' && c <= '9') {
+        int c = getchar_timeout_us(2);
+        if (c == PICO_ERROR_TIMEOUT) {
+            if (multicore_fifo_rvalid()) {
+                uint32_t addr = multicore_fifo_pop_blocking();
+                printf("Access to address %x\n",addr);
+            }
+        } else if (c >= '0' && c <= '9') {
             c -= '0';
         } else if (c >= 'a' && c <= 'f') {
             c -= 'a' - 10;
         } else if (c == 'R') {
             c = -1;
             reset_usb_boot(0,0);
-        } else { c = -1; }
-        if (c >= 0) {
-            printf("Setting LEDs to %x.\n",c);
-            multicore_fifo_push_blocking(c);
         } else {
             printf("Unrecognized hex digit.\n");
+            c = -1; 
+        }
+        if (c >= 0) {
+            printf("Setting LEDs to %x.\n",c);
+            for (size_t i = 0; i < LED_PINS_COUNT; i++) {
+                gpio_put(LED_PINS[i], (c & (1<<i))?1:0);
+            }
         }
     }
     return 0;
