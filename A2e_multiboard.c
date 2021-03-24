@@ -70,7 +70,6 @@ void initialize_gpio() {
     init_pin(PIN_LED_1,0);
     init_pin(PIN_LED_2,0);
     init_pin(PIN_LED_3,0);
-
 }
 
 void core1() {
@@ -97,8 +96,10 @@ int main()
         int c = getchar_timeout_us(2);
         if (c == PICO_ERROR_TIMEOUT) {
             if (multicore_fifo_rvalid()) {
-                uint32_t addr = multicore_fifo_pop_blocking();
-                printf("Access to address %x\n",addr);
+                uint32_t raw = multicore_fifo_pop_blocking();
+                uint16_t addr = raw >> 16;
+                //if (raw > 0xc000) 
+                    printf("Access to address %x\n",raw);
             }
         } else if (c >= '0' && c <= '9') {
             c -= '0';

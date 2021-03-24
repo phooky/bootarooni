@@ -38,7 +38,7 @@ loop:
     WAIT 1 gpio PHI1        side 0 [15] // wait for phi1 to go high
     SET pins, 1             side 0 [15] // set fn to load register
     SET X, 8                side 0 [5]
-    JMP pin skip            side 1      // load reg; skip is DEVSEL is high
+//    JMP pin skip            side 1      // load reg; skip is DEVSEL is high
     SET pins, 0             side 1      // set fn to shift data
 read:
     IN pins, 2              side 0      // read even/odd address bits
@@ -50,10 +50,12 @@ skip:
 
 % c-sdk {
 static inline void init_addrbus(PIO pio, uint sm, uint offset) {
+    pio_gpio_init(pio,10);
     pio_sm_config conf = addrbus_program_get_default_config(offset);
     sm_config_set_out_pins(&conf, 7, 1);
     sm_config_set_set_pins(&conf, 7, 1);
     sm_config_set_in_pins(&conf, 14);
+    sm_config_set_in_shift(&conf, false, false, 0);
     sm_config_set_sideset_pins(&conf, 5);
     sm_config_set_jmp_pin(&conf, 10);
     sm_config_set_clkdiv(&conf, 1.0);
