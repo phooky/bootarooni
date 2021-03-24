@@ -1,3 +1,18 @@
+//
+// An overview of timing.
+// Assuming the RP2040 is running at 125MHz, an access cycle looks like
+// this:
+//
+// time (nS)|Cycles| Event
+// ---------+------+-----------------------
+//       0  |    0 | Phi1 rises
+//     300  |   38 | ADDR is valid
+//     500  |   63 | Phi1 falls
+//     700  |   88 | DATA is valid (from CPU)
+//     900  |  112 | DATA is valid (to CPU)
+//
+
+
 .program addrbus 
 
 
@@ -15,26 +30,22 @@
 // Side set: size 1 (1 enable bit)
 // ADDR_CLK 
 // Side base: 5, size count: 1
-// We CAN afford the spare bit for optional sideset
-.side_set 1 opt
+.side_set 1
 
 // Jump pin: DEVSEL (pin 10)
 
 loop:
-    // Set in parallel load mode, prep for load
-    SET pins, 1 side 0
-    SET X, 8
-    // wait for Q1 to go high
-    // 300 nsec later address is valid; set in shift out mode
-    WAIT 1 gpio PHI1 [7]
-    JMP pin skip side 1 // ignore if devsel is high
-    SET pins, 0 // shift register mode
+    WAIT 1 gpio PHI1        side 0 [15] // wait for phi1 to go high
+    SET pins, 1             side 0 [15] // set fn to load register
+    SET X, 8                side 0 [5]
+    JMP pin skip            side 1      // load reg; skip is DEVSEL is high
+    SET pins, 0             side 1      // set fn to shift data
 read:
-    IN pins, 2 side 0
-    JMP X-- read side 1
-    PUSH
+    IN pins, 2              side 0      // read even/odd address bits
+    JMP X-- read            side 1      // shift by 1 
+    PUSH                    side 0      // send address to processor
 skip:
-    WAIT 0 gpio PHI1
+    WAIT 0 gpio PHI1        side 0      // wait for phi1 to go low
 
 
 % c-sdk {
