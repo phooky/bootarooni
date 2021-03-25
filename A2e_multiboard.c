@@ -76,12 +76,14 @@ void core1() {
     PIO pio = pio0;
     uint sm = 0;
     uint offset = pio_add_program(pio, &addrbus_program);
-    io_ro_32 *addr = &pio->rxf[sm];
+    io_ro_32 *addr_reg = &pio->rxf[sm];
     init_addrbus(pio, sm, offset);
     while (true) {
         while (pio_sm_is_rx_fifo_empty(pio, sm))
             tight_loop_contents();
-        multicore_fifo_push_blocking(*addr);
+        uint32_t addr = *addr_reg;
+        addr = ((addr & 0xAAAA) >> 1) | ((addr & 0x5555) << 1);
+        multicore_fifo_push_blocking(addr);
     }
 
 }
