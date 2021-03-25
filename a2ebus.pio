@@ -34,18 +34,17 @@
 
 // Jump pin: DEVSEL (pin 10)
 
-loop:
+skip:
     WAIT 1 gpio PHI1        side 0 [15] // wait for phi1 to go high
     SET pins, 1             side 0 [15] // set fn to load register
     SET X, 8                side 0 [5]
-//    JMP pin skip            side 1      // load reg; skip is DEVSEL is high
     SET pins, 0             side 1      // set fn to shift data
 read:
-    IN pins, 2              side 0      // read even/odd address bits
-    JMP X-- read            side 1      // shift by 1 
+    IN pins, 2              side 0 [1]     // read even/odd address bits
+    JMP X-- read            side 1 [1]     // shift by 1 
+    WAIT 0 gpio PHI1        side 0 [5]     // wait for phi1 to go low
+    JMP pin skip            side 1      // load reg; skip is DEVSEL is high
     PUSH                    side 0      // send address to processor
-skip:
-    WAIT 0 gpio PHI1        side 0      // wait for phi1 to go low
 
 
 % c-sdk {
