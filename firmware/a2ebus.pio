@@ -15,21 +15,11 @@
 
 .program addrbus 
 
-
-// All inputs are in terms of absolute GPIO
 .define PHI1 11
 
-// In: size 2
-// AO_OUT AE_OUT
-// Base: 14, count: 2
-
-// Out: size 1
-// ADDR_FN
-// Base: 7, count: 1
-
-// Side set: size 1 (1 enable bit)
-// ADDR_CLK 
-// Side base: 5, size count: 1
+// In: AO_OUT AE_OUT (Base 14, count 2)
+// Out: ADDR_FN (Base 7, count 1)
+// Side set: ADDR_CLK (Base 5, count 1)
 .side_set 1
 
 // Jump pin: DEVSEL (pin 10)
