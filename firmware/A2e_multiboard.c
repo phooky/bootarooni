@@ -74,16 +74,24 @@ void initialize_gpio() {
 
 void core1() {
     PIO pio = pio0;
-    uint sm = 0;
-    uint offset = pio_add_program(pio, &addrbus_program);
-    io_ro_32 *addr_reg = &pio->rxf[sm];
-    init_addrbus(pio, sm, offset);
+    uint addr_sm = 0;
+    uint data_sm = 1;
+    uint addr_offset = pio_add_program(pio, &addrbus_program);
+    uint data_offset = pio_add_program(pio, &databus_program);
+    io_ro_32 *addr_reg = &pio->rxf[addr_sm];
+    io_ro_32 *data_reg = &pio->rxf[data_sm];
+    init_databus(pio, data_sm, data_offset);
+    init_addrbus(pio, addr_sm, addr_offset);
     while (true) {
-        while (pio_sm_is_rx_fifo_empty(pio, sm))
+        while (pio_sm_is_rx_fifo_empty(pio, addr_sm))
             tight_loop_contents();
         uint32_t addr = *addr_reg;
         addr = ((addr & 0xAAAA) >> 1) | ((addr & 0x5555) << 1);
         multicore_fifo_push_blocking(addr);
+        while (pio_sm_is_rx_fifo_empty(pio, data_sm))
+            tight_loop_contents();
+        uint32_t data = *data_reg | 0x0055AA00;
+        multicore_fifo_push_blocking(data);
     }
 
 }
@@ -101,6 +109,9 @@ int main()
                 uint32_t raw = multicore_fifo_pop_blocking();
                 uint16_t addr = raw >> 16;
                 //if (raw > 0xc000) 
+                if ((raw & 0x0055AA00) == 0x0055AA00)
+                    printf("Data value %x\n", raw);
+                else
                     printf("Access to address %x\n",raw);
             }
         } else if (c >= '0' && c <= '9') {

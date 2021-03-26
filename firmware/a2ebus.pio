@@ -11,7 +11,8 @@
 //     700  |   88 | DATA is valid (from CPU)
 //     900  |  112 | DATA is valid (to CPU)
 //
-
+//
+// IRQ 
 
 .program addrbus 
 
@@ -20,9 +21,8 @@
 // In: AO_OUT AE_OUT (Base 14, count 2)
 // Out: ADDR_FN (Base 7, count 1)
 // Side set: ADDR_CLK (Base 5, count 1)
-.side_set 1
-
 // Jump pin: DEVSEL (pin 10)
+.side_set 1
 
 skip:
     WAIT 1 gpio PHI1        side 0 [15] // wait for phi1 to go high
@@ -35,6 +35,7 @@ read:
     WAIT 0 gpio PHI1        side 0 [5]     // wait for phi1 to go low
     JMP pin skip            side 1      // load reg; skip is DEVSEL is high
     PUSH                    side 0      // send address to processor
+    IRQ set 4               side 0      // signal to data program to start
 
 
 % c-sdk {
@@ -57,3 +58,47 @@ static inline void init_addrbus(PIO pio, uint sm, uint offset) {
 
 %}
 
+.program databus
+
+.define PHI1 11
+
+// In: DATA_OUT (Base 13, count 1)
+// Set: DATA_OE DATA_FN (Base 2, count 2)
+// Out: DATA_IN (Base 0, count 1)
+// Side set: DATA_CLK (Base 1, count 1)
+// Jump pin: R_W (pin 12)
+.side_set 1
+
+skip: // IRQ should be set 9 cycles after phi1 goes low
+    SET pins, 3         side 0      // ensure that we're not stomping on OE
+    WAIT 1 irq 4        side 0      // 10: Wait until triggered by address side
+    JMP pin read        side 0      // 11
+    // WRITE code goes here
+    JMP skip            side 0
+read:
+    SET pins, 3         side 0 [3]  // 12
+    SET X, 8            side 0 [3]  // 16
+    SET pins, 1         side 1 [4]  // 20
+rloop: // 25 cycles after phi1 low, data should be valid
+    IN pins, 1          side 0 [1]
+    JMP X-- rloop       side 1 [1]
+    PUSH                side 0
+
+% c-sdk {
+static inline void init_databus(PIO pio, uint sm, uint offset) {
+    pio_sm_config conf = databus_program_get_default_config(offset);
+    sm_config_set_out_pins(&conf, 0, 1);
+    sm_config_set_set_pins(&conf, 2, 2);
+    sm_config_set_in_pins(&conf, 13);
+    sm_config_set_in_shift(&conf, false, false, 0);
+    sm_config_set_sideset_pins(&conf, 1);
+    sm_config_set_jmp_pin(&conf, 12);
+    sm_config_set_clkdiv(&conf, 1.0);
+    pio_gpio_init(pio, 0); pio_gpio_init(pio,1);
+    pio_gpio_init(pio, 2); pio_gpio_init(pio,3);
+    pio_sm_set_pindirs_with_mask(pio, sm, 0xd, 0xd);
+    pio_sm_init(pio, sm, offset, &conf);
+    pio_sm_set_enabled(pio, sm, true); 
+}
+
+%}
