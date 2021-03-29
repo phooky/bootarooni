@@ -63,22 +63,22 @@ static inline void init_addrbus(PIO pio, uint sm, uint offset) {
 .define PHI1 11
 
 // In: DATA_OUT (Base 13, count 1)
-// Set: DATA_OE DATA_FN (Base 2, count 2)
+// Set: DATA_FN (Base 3, count 1)
 // Out: DATA_IN (Base 0, count 1)
 // Side set: DATA_CLK (Base 1, count 1)
 // Jump pin: R_W (pin 12)
 .side_set 1
 
 skip: // IRQ should be set 9 cycles after phi1 goes low
-    SET pins, 3         side 0      // ensure that we're not stomping on OE
     WAIT 1 irq 4        side 0      // 10: Wait until triggered by address side
-    JMP pin read        side 0      // 11
+    //JMP pin read        side 0      // 11
     // WRITE code goes here
-    JMP skip            side 0
+    //JMP skip            side 0
 read:
-    SET pins, 3         side 0 [3]  // 12
-    SET X, 8            side 0 [3]  // 16
-    SET pins, 1         side 1 [4]  // 20
+    SET pins, 1         side 0 [10]  // 12
+    SET X, 8            side 0 [10]  // 16
+    SET pins, 1         side 1 [10]
+    SET pins, 0         side 1 // 20
 rloop: // 25 cycles after phi1 low, data should be valid
     IN pins, 1          side 0 [1]
     JMP X-- rloop       side 1 [1]
@@ -87,16 +87,16 @@ rloop: // 25 cycles after phi1 low, data should be valid
 % c-sdk {
 static inline void init_databus(PIO pio, uint sm, uint offset) {
     pio_sm_config conf = databus_program_get_default_config(offset);
-    sm_config_set_out_pins(&conf, 0, 1);
-    sm_config_set_set_pins(&conf, 2, 2);
+    sm_config_set_out_pins(&conf, 3, 1);
+    sm_config_set_set_pins(&conf, 3, 1);
     sm_config_set_in_pins(&conf, 13);
     sm_config_set_in_shift(&conf, false, false, 0);
     sm_config_set_sideset_pins(&conf, 1);
-    sm_config_set_jmp_pin(&conf, 12);
+    //sm_config_set_jmp_pin(&conf, 12);
     sm_config_set_clkdiv(&conf, 1.0);
-    pio_gpio_init(pio, 0); pio_gpio_init(pio,1);
-    pio_gpio_init(pio, 2); pio_gpio_init(pio,3);
-    pio_sm_set_pindirs_with_mask(pio, sm, 0xd, 0xd);
+    pio_gpio_init(pio,1);
+    pio_gpio_init(pio,3);
+    pio_sm_set_pindirs_with_mask(pio, sm, 1<<1 | 1<<3, 1<<1 | 1<<3);
     pio_sm_init(pio, sm, offset, &conf);
     pio_sm_set_enabled(pio, sm, true); 
 }

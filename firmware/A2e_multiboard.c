@@ -90,7 +90,7 @@ void core1() {
         multicore_fifo_push_blocking(addr);
         while (pio_sm_is_rx_fifo_empty(pio, data_sm))
             tight_loop_contents();
-        uint32_t data = *data_reg | 0x0055AA00;
+        uint32_t data = *data_reg | 0x00500A00;
         multicore_fifo_push_blocking(data);
     }
 
@@ -109,7 +109,7 @@ int main()
                 uint32_t raw = multicore_fifo_pop_blocking();
                 uint16_t addr = raw >> 16;
                 //if (raw > 0xc000) 
-                if ((raw & 0x0055AA00) == 0x0055AA00)
+                if ((raw & 0x00500A00) == 0x00500A00)
                     printf("Data value %x\n", raw);
                 else
                     printf("Access to address %x\n",raw);
