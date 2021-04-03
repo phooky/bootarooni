@@ -75,6 +75,7 @@ void initialize_gpio() {
     gpio_init(PIN_IOSEL);
     gpio_init(PIN_DEVSEL);
     gpio_init(PIN_RW_IN);
+    gpio_set_dir(PIN_RW_IN, GPIO_IN);
 }
 
 void core1() {
@@ -92,11 +93,16 @@ void core1() {
             tight_loop_contents();
         uint32_t addr = *addr_reg;
         addr = ((addr & 0xAAAA) >> 1) | ((addr & 0x5555) << 1);
-        multicore_fifo_push_blocking(addr);
-        multicore_fifo_push_blocking(gpio_get_all());
+        uint32_t flags = *addr_reg;
+        // Offset by 14, so bit 31 = gpio 13, bit 30 = gpio 12, etc
+        // Let's compile into 000... IOSEL DEVSEL RW
+        // for now let's just isolate RW
+        flags = (flags >> 30) & 0x01;
         while (pio_sm_is_rx_fifo_empty(pio, data_sm))
             tight_loop_contents();
         uint32_t data = *data_reg;
+        multicore_fifo_push_blocking(addr);
+        multicore_fifo_push_blocking(flags);
         multicore_fifo_push_blocking(data);
     }
 
@@ -115,13 +121,15 @@ int main()
                 uint32_t addr = multicore_fifo_pop_blocking();
                 printf("Access to address %x\n",addr);
                 uint32_t flags = multicore_fifo_pop_blocking();
-                /*printf("IOSEL %d DEVSEL %d RW %d\n",
-                        flags & (1<<PIN_IOSEL),
-                        flags & (1<<PIN_DEVSEL),
-                        flags & (1<<PIN_RW_IN));*/
-                printf("Flags %x\n",flags);
-                uint32_t data = multicore_fifo_pop_blocking();
-                printf("Data value %x\n", data);
+                if (flags) {
+                    // READ, provide value
+                    uint32_t data = multicore_fifo_pop_blocking();
+                    printf("Reading - (%x).\n",data);
+                } else {
+                    // WRITE, accept value
+                    uint32_t data = multicore_fifo_pop_blocking();
+                    printf("Data value %x\n", data);
+                }
             }
         } else if (c >= '0' && c <= '9') {
             c -= '0';

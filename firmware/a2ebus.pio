@@ -36,6 +36,8 @@ read:
     JMP pin skip            side 1      // load reg; skip is DEVSEL is high
     PUSH                    side 0      // send address to processor
     IRQ set 4               side 0      // signal to data program to start
+    IN pins, 32             side 0      // read in all lines for core1
+    PUSH                    side 0      // send lines to core1
 
 
 % c-sdk {
@@ -71,12 +73,12 @@ static inline void init_addrbus(PIO pio, uint sm, uint offset) {
 
 skip: // IRQ should be set 9 cycles after phi1 goes low
     SET pins, 3         side 0      // Make sure OE is high
+    SET X, 8            side 0 
     WAIT 1 irq 4        side 0      // 10: Wait until triggered by address side
     JMP pin write       side 0      // 11
 read:
-    SET pins, 3         side 0 [10]  // 12
-    SET X, 8            side 0 [10]  // 16
-    SET pins, 3         side 1 [10]
+    SET pins, 3         side 0 [15]  // 12
+    SET pins, 3         side 1 [15]
     SET pins, 1         side 1 // 20
 rloop: // 25 cycles after phi1 low, data should be valid
     IN pins, 1          side 0 [1]
@@ -85,15 +87,23 @@ rloop: // 25 cycles after phi1 low, data should be valid
     JMP skip            side 0
 write:
     // WRITE code goes here
-    SET Y, 21 side 0
-    IN Y, 8 side 0
-    PUSH side 0
+    SET Y, 22 side 1
+    SET pins, 1 side 1
+    MOV OSR, Y side 0 // backwards world
+    MOV ISR, OSR side 0
+wloop:
+    OUT pins, 1 side 0 [1]
+    JMP X-- rloop side 1 [0]
+    SET pins, 0 side 1
+    PUSH side 1
+    WAIT 1 gpio PHI1 side 1
     
 
 % c-sdk {
 static inline void init_databus(PIO pio, uint sm, uint offset) {
     pio_sm_config conf = databus_program_get_default_config(offset);
     sm_config_set_out_pins(&conf, 0, 1);
+    sm_config_set_out_shift(&conf, true, false, 0);
     sm_config_set_set_pins(&conf, 2, 2);
     sm_config_set_in_pins(&conf, 13);
     sm_config_set_in_shift(&conf, false, false, 0);
