@@ -98,9 +98,12 @@ void core1() {
         // Let's compile into 000... IOSEL DEVSEL RW
         // for now let's just isolate RW
         flags = (flags >> 30) & 0x01;
+        uint32_t data = 0;
+        if (flags) {
         while (pio_sm_is_rx_fifo_empty(pio, data_sm))
             tight_loop_contents();
-        uint32_t data = *data_reg;
+            data = *data_reg;
+        }
         multicore_fifo_push_blocking(addr);
         multicore_fifo_push_blocking(flags);
         multicore_fifo_push_blocking(data);

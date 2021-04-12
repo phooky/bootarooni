@@ -89,9 +89,10 @@ write:
     // WRITE code goes here
     SET Y, 15 side 1
     SET pins, 1 side 1
-    MOV OSR, Y side 0 // backwards world
+    MOV OSR, :: Y side 0 // backwards world
     MOV ISR, OSR side 0
-    PUSH side 0
+    //PUSH side 0
+    SET X, 7 side 0
 wloop:
     OUT pins, 1 side 0 [1]
     JMP X-- wloop side 1 [1]
@@ -103,7 +104,7 @@ wloop:
 static inline void init_databus(PIO pio, uint sm, uint offset) {
     pio_sm_config conf = databus_program_get_default_config(offset);
     sm_config_set_out_pins(&conf, 0, 1);
-    sm_config_set_out_shift(&conf, true, false, 0);
+    sm_config_set_out_shift(&conf, false, false, 0);
     sm_config_set_set_pins(&conf, 2, 2);
     sm_config_set_in_pins(&conf, 13);
     sm_config_set_in_shift(&conf, false, false, 0);
