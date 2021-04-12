@@ -87,15 +87,15 @@ rloop: // 25 cycles after phi1 low, data should be valid
     JMP skip            side 0
 write:
     // WRITE code goes here
-    SET Y, 22 side 1
+    SET Y, 15 side 1
     SET pins, 1 side 1
     MOV OSR, Y side 0 // backwards world
     MOV ISR, OSR side 0
+    PUSH side 0
 wloop:
     OUT pins, 1 side 0 [1]
-    JMP X-- rloop side 1 [0]
+    JMP X-- wloop side 1 [1]
     SET pins, 0 side 1
-    PUSH side 1
     WAIT 1 gpio PHI1 side 1
     
 
@@ -112,8 +112,10 @@ static inline void init_databus(PIO pio, uint sm, uint offset) {
     sm_config_set_clkdiv(&conf, 1.0);
     pio_gpio_init(pio,1);
     pio_gpio_init(pio,3);
+    pio_gpio_init(pio,0);
     pio_gpio_init(pio,2);
-    pio_sm_set_pindirs_with_mask(pio, sm, 1<<1 | 1<<2 | 1<<3, 1<<1 | 1<<2 | 1<<3);
+    pio_sm_set_pindirs_with_mask(pio, sm, 1<<0 |1<<1 | 1<<2 | 1<<3,
+        1<<0 | 1<<1 | 1<<2 | 1<<3);
     pio_sm_init(pio, sm, offset, &conf);
     pio_sm_set_enabled(pio, sm, true); 
 }
