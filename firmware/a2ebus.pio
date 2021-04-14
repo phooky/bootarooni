@@ -87,17 +87,14 @@ rloop: // 25 cycles after phi1 low, data should be valid
     JMP skip            side 0
 write:
     // WRITE code goes here
-    SET Y, 15 side 1
-    SET pins, 1 side 1
-    MOV OSR, :: Y side 0 // backwards world
-    MOV ISR, OSR side 0
-    //PUSH side 0
-    SET X, 7 side 0
+    SET pins, 1         side 1
+    SET X, 7            side 0
+    PULL noblock        side 0
 wloop:
-    OUT pins, 1 side 0 [1]
-    JMP X-- wloop side 1 [1]
-    SET pins, 0 side 1
-    WAIT 1 gpio PHI1 side 1
+    OUT pins, 1         side 0 [1]
+    JMP X-- wloop       side 1 [1]
+    SET pins, 0         side 1
+    WAIT 1 gpio PHI1    side 1
     
 
 % c-sdk {

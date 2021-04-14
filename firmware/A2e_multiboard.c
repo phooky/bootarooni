@@ -88,6 +88,7 @@ void core1() {
     io_ro_32 *data_reg = &pio->rxf[data_sm];
     init_databus(pio, data_sm, data_offset);
     init_addrbus(pio, addr_sm, addr_offset);
+    uint32_t data = 0;
     while (true) {
         while (pio_sm_is_rx_fifo_empty(pio, addr_sm))
             tight_loop_contents();
@@ -98,11 +99,13 @@ void core1() {
         // Let's compile into 000... IOSEL DEVSEL RW
         // for now let's just isolate RW
         flags = (flags >> 30) & 0x01;
-        uint32_t data = 0;
-        if (flags) {
-        while (pio_sm_is_rx_fifo_empty(pio, data_sm))
-            tight_loop_contents();
+        if (!flags) {
+            while (pio_sm_is_rx_fifo_empty(pio, data_sm))
+                tight_loop_contents();
             data = *data_reg;
+        } else {
+            //if (!pio_sm_is_tx_fifo_empty(pio, data_sm)) { data = 0xfe; } // check for buffered stuff
+            pio_sm_put(pio, data_sm, data << 24);
         }
         multicore_fifo_push_blocking(addr);
         multicore_fifo_push_blocking(flags);
