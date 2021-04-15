@@ -10,18 +10,19 @@
 //     700  |   88 | DATA is valid (from CPU)
 //     900  |  112 | DATA is valid (to CPU)
 //
-//
-//
-// IRQ 
 
-.program addrbus 
+.program addr_read 
 
 .define PHI1 11
 
+// The addrbus program reads addresses as they become
+// available and send them to the rxfifo, where they are
+// read by core1. One address is read per phi cycle.
+// After each address the entire pin register is sent,
+// to extract the R/W bit.
 // In: AO_OUT AE_OUT (Base 14, count 2)
 // Out: ADDR_FN (Base 7, count 1)
 // Side set: ADDR_CLK (Base 5, count 1)
-// Jump pin: DEVSEL (pin 10)
 .side_set 1
 
 skip:
@@ -33,23 +34,20 @@ read:
     IN pins, 2              side 0      // read even/odd address bits
     JMP X-- read            side 1 [1]  // shift by 1 
     WAIT 0 gpio PHI1        side 0      // wait for phi1 to go low
-    JMP pin skip            side 1      // load reg; skip is DEVSEL is high
     PUSH                    side 0      // send address to processor
-    IRQ set 4               side 0      // signal to data program to start
     IN pins, 32             side 0      // read in all lines for core1
     PUSH                    side 0      // send lines to core1
 
 
 % c-sdk {
-static inline void init_addrbus(PIO pio, uint sm, uint offset) {
+static inline void init_addr_read(PIO pio, uint sm, uint offset) {
     pio_gpio_init(pio,10);
-    pio_sm_config conf = addrbus_program_get_default_config(offset);
+    pio_sm_config conf = addr_read_program_get_default_config(offset);
     sm_config_set_out_pins(&conf, 7, 1);
     sm_config_set_set_pins(&conf, 7, 1);
     sm_config_set_in_pins(&conf, 14);
     sm_config_set_in_shift(&conf, false, false, 0);
     sm_config_set_sideset_pins(&conf, 5);
-    sm_config_set_jmp_pin(&conf, 10);
     sm_config_set_clkdiv(&conf, 1.0);
     pio_gpio_init(pio, 7);
     pio_gpio_init(pio, 5);

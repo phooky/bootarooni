@@ -85,13 +85,12 @@ void core1() {
     PIO pio = pio0;
     uint addr_sm = 0;
     uint data_sm = 1;
-    uint addr_offset = pio_add_program(pio, &addrbus_program);
+    uint addr_offset = pio_add_program(pio, &addr_read_program);
     uint data_offset = pio_add_program(pio, &databus_program);
     io_ro_32 *addr_reg = &pio->rxf[addr_sm];
     io_ro_32 *data_reg = &pio->rxf[data_sm];
     init_databus(pio, data_sm, data_offset);
-    init_addrbus(pio, addr_sm, addr_offset);
-    uint32_t data = 0; // We're persisting the data to handle reads/writes
+    init_addr_read(pio, addr_sm, addr_offset);
     while (true) {
         while (pio_sm_is_rx_fifo_empty(pio, addr_sm))
             tight_loop_contents();
@@ -101,8 +100,9 @@ void core1() {
         // Offset by 14, so bit 31 = gpio 13, bit 30 = gpio 12, etc
         // Let's compile into 000... IOSEL DEVSEL RW
         // for now let's just isolate RW
-        flags = (flags >> 30) & 0x01;
-        if (flags) {
+        bool rw_flag = (flags >> 30) & 0x01;
+        /*
+        if (rw_flag) {
             // READING FROM card, provide value
             //if (!pio_sm_is_tx_fifo_empty(pio, data_sm)) { data = 0xfe; } // check for buffered stuff
             pio_sm_put(pio, data_sm, data << 24);
@@ -111,11 +111,10 @@ void core1() {
             while (pio_sm_is_rx_fifo_empty(pio, data_sm))
                 tight_loop_contents();
             data = *data_reg;
-        }
+        }*/
         multicore_fifo_push_blocking(addr);
-        // DEBUGGING: Let's compare the SIO reads to the addr_reg stuff.
-        multicore_fifo_push_blocking(flags);
-        multicore_fifo_push_blocking(data);
+        multicore_fifo_push_blocking(rw_flag);
+        //multicore_fifo_push_blocking(data);
     }
 
 }
@@ -131,16 +130,11 @@ int main()
         if (c == PICO_ERROR_TIMEOUT) {
             if (multicore_fifo_rvalid()) {
                 uint32_t addr = multicore_fifo_pop_blocking();
-                printf("Access to address %x\n",addr);
-                uint32_t flags = multicore_fifo_pop_blocking();
-                if (flags) {
-                    // READING FROM card, provide value
-                    uint32_t data = multicore_fifo_pop_blocking();
-                    printf("Reading - (%x).\n",data);
-                } else {
-                    // WRITING TO card, accept value
-                    uint32_t data = multicore_fifo_pop_blocking();
-                    printf("Data value %x\n", data);
+                uint32_t rw_flag = multicore_fifo_pop_blocking();
+                if ((addr & 0xCF00) == 0xC000) {
+                    printf("IOSEL %x RW %d\n",addr, rw_flag);
+                } else if ((addr & 0xC000) == 0xC000) {
+                    printf("DEVSEL %x RW %d\n",addr, rw_flag);
                 }
             }
         } else if (c >= '0' && c <= '9') {
