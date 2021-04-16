@@ -98,7 +98,7 @@ void core1() {
         // Offset by 14, so bit 31 = gpio 13, bit 30 = gpio 12, etc
         // Let's compile into 000... IOSEL DEVSEL RW
         // for now let's just isolate RW
-        flags = (flags >> 30) & 0x01;
+        //flags = (flags >> 30) & 0x01;
         /*
         if (!flags) {
             while (pio_sm_is_rx_fifo_empty(pio, data_sm))
@@ -126,16 +126,22 @@ int main()
         if (c == PICO_ERROR_TIMEOUT) {
             if (multicore_fifo_rvalid()) {
                 uint32_t addr = multicore_fifo_pop_blocking();
-                printf("Access to address %x\n",addr);
                 uint32_t flags = multicore_fifo_pop_blocking();
-                if (flags) {
-                    // READ, provide value
-                    uint32_t data = multicore_fifo_pop_blocking();
-                    printf("Reading - (%x).\n",data);
-                } else {
-                    // WRITE, accept value
-                    uint32_t data = multicore_fifo_pop_blocking();
-                    printf("Data value %x\n", data);
+                bool fl_rw = (flags >> 30) & 0x01;
+                bool fl_iosel = (flags >> 27) & 0x01;
+                bool fl_devsel = (flags >> 28) & 0x01;
+                if (!fl_iosel || !fl_devsel) {
+                    printf("Access to address %x\n",addr);
+                    printf("IOSEL %d DEVSEL %d\n", fl_iosel, fl_devsel);
+                    if (fl_rw) {
+                        // READ, provide value
+                        uint32_t data = multicore_fifo_pop_blocking();
+                        printf("Reading - (%x).\n",data);
+                    } else {
+                        // WRITE, accept value
+                        uint32_t data = multicore_fifo_pop_blocking();
+                        printf("Data value %x\n", data);
+                    }
                 }
             }
         } else if (c >= '0' && c <= '9') {
