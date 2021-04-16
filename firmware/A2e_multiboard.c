@@ -75,6 +75,8 @@ void initialize_gpio() {
     gpio_init(PIN_IOSEL);
     gpio_init(PIN_DEVSEL);
     gpio_init(PIN_RW_IN);
+    gpio_set_dir(PIN_IOSEL, GPIO_IN);
+    gpio_set_dir(PIN_DEVSEL, GPIO_IN);
     gpio_set_dir(PIN_RW_IN, GPIO_IN);
 }
 
@@ -95,6 +97,8 @@ void core1() {
         uint32_t addr = *addr_reg;
         addr = ((addr & 0xAAAA) >> 1) | ((addr & 0x5555) << 1);
         uint32_t flags = *addr_reg;
+        bool fl_iosel = (flags >> 27) & 0x01;
+        bool fl_devsel = (flags >> 28) & 0x01;
         // Offset by 14, so bit 31 = gpio 13, bit 30 = gpio 12, etc
         // Let's compile into 000... IOSEL DEVSEL RW
         // for now let's just isolate RW
@@ -108,9 +112,10 @@ void core1() {
             //if (!pio_sm_is_tx_fifo_empty(pio, data_sm)) { data = 0xfe; } // check for buffered stuff
             pio_sm_put(pio, data_sm, data << 24);
         }*/
-        multicore_fifo_push_blocking(addr);
-        multicore_fifo_push_blocking(flags);
-        multicore_fifo_push_blocking(data);
+        if ((!fl_iosel || !fl_devsel) && multicore_fifo_wready()) {
+            multicore_fifo_push_blocking(addr);
+            multicore_fifo_push_blocking(flags);
+        }
     }
 
 }
@@ -127,19 +132,19 @@ int main()
             if (multicore_fifo_rvalid()) {
                 uint32_t addr = multicore_fifo_pop_blocking();
                 uint32_t flags = multicore_fifo_pop_blocking();
+                uint32_t data = 0;
                 bool fl_rw = (flags >> 30) & 0x01;
                 bool fl_iosel = (flags >> 27) & 0x01;
                 bool fl_devsel = (flags >> 28) & 0x01;
                 if (!fl_iosel || !fl_devsel) {
                     printf("Access to address %x\n",addr);
+                    printf("Flags %x\n",flags);
                     printf("IOSEL %d DEVSEL %d\n", fl_iosel, fl_devsel);
                     if (fl_rw) {
                         // READ, provide value
-                        uint32_t data = multicore_fifo_pop_blocking();
                         printf("Reading - (%x).\n",data);
                     } else {
                         // WRITE, accept value
-                        uint32_t data = multicore_fifo_pop_blocking();
                         printf("Data value %x\n", data);
                     }
                 }

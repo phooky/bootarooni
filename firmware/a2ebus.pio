@@ -33,10 +33,8 @@ read:
     IN pins, 2              side 0      // read even/odd address bits
     JMP X-- read            side 1 [1]  // shift by 1 
     WAIT 0 gpio PHI1        side 0      // wait for phi1 to go low
-    JMP pin skip            side 1      // load reg; skip is DEVSEL is high
-    PUSH                    side 0      // send address to processor
-    IRQ set 4               side 0      // signal to data program to start
-    IN pins, 32             side 0      // read in all lines for core1
+    PUSH                    side 1      // send address to processor
+    IN pins, 32             side 1      // read in all lines for core1
     PUSH                    side 0      // send lines to core1
 
 
@@ -53,6 +51,9 @@ static inline void init_addrbus(PIO pio, uint sm, uint offset) {
     sm_config_set_clkdiv(&conf, 1.0);
     pio_gpio_init(pio, 7);
     pio_gpio_init(pio, 5);
+    pio_gpio_init(pio, 9);
+    pio_gpio_init(pio, 10);
+    pio_gpio_init(pio, 12);
     pio_sm_set_pindirs_with_mask(pio, sm, 1<<7 | 1<< 5, 1<<7 | 1<<5);
     pio_sm_init(pio, sm, offset, &conf);
     pio_sm_set_enabled(pio, sm, true);
