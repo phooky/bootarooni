@@ -80,14 +80,14 @@ void initialize_gpio() {
 
 void core1() {
     PIO pio = pio0;
-    uint addr_sm = 0;
-    uint data_sm = 1;
+    const uint addr_sm = 0;
     uint addr_offset = pio_add_program(pio, &addrbus_program);
-    uint data_offset = pio_add_program(pio, &databus_program);
     io_ro_32 *addr_reg = &pio->rxf[addr_sm];
-    io_ro_32 *data_reg = &pio->rxf[data_sm];
-    init_databus(pio, data_sm, data_offset);
     init_addrbus(pio, addr_sm, addr_offset);
+    // uint data_sm = 1;
+    // uint data_offset = pio_add_program(pio, &databus_program);
+    // io_ro_32 *data_reg = &pio->rxf[data_sm];
+    // init_databus(pio, data_sm, data_offset);
     uint32_t data = 0;
     while (true) {
         while (pio_sm_is_rx_fifo_empty(pio, addr_sm))
@@ -99,6 +99,7 @@ void core1() {
         // Let's compile into 000... IOSEL DEVSEL RW
         // for now let's just isolate RW
         flags = (flags >> 30) & 0x01;
+        /*
         if (!flags) {
             while (pio_sm_is_rx_fifo_empty(pio, data_sm))
                 tight_loop_contents();
@@ -106,7 +107,7 @@ void core1() {
         } else {
             //if (!pio_sm_is_tx_fifo_empty(pio, data_sm)) { data = 0xfe; } // check for buffered stuff
             pio_sm_put(pio, data_sm, data << 24);
-        }
+        }*/
         multicore_fifo_push_blocking(addr);
         multicore_fifo_push_blocking(flags);
         multicore_fifo_push_blocking(data);
