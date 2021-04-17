@@ -81,6 +81,7 @@ void initialize_gpio() {
 }
 
 void core1() {
+    // Address read, data 
     PIO pio = pio0;
     const uint addr_sm = 0;
     uint offset = pio_add_program(pio, &addrbus_program);
@@ -93,15 +94,13 @@ void core1() {
 
     uint data_write_sm = 2;
     offset = pio_add_program(pio, &data_write_program);
-    init_data_write(pio, data_read_sm, offset);
+    init_data_write(pio, data_write_sm, offset);
 
-    uint32_t data = 0;
+    uint32_t data = 52;
     while (true) {
-        while (pio_sm_is_rx_fifo_empty(pio, addr_sm))
-            tight_loop_contents();
-        uint32_t addr = *addr_reg;
+        uint32_t addr = pio_sm_get_blocking(pio, addr_sm);
         addr = ((addr & 0xAAAA) >> 1) | ((addr & 0x5555) << 1);
-        uint32_t flags = *addr_reg;
+        uint32_t flags = pio_sm_get_blocking(pio, addr_sm);
         // Offset by 14, so bit 31 = gpio 13, bit 30 = gpio 12, etc
         bool fl_iosel = (flags >> 27) & 0x01;
         bool fl_devsel = (flags >> 28) & 0x01;
@@ -119,6 +118,7 @@ void core1() {
         if ((!fl_iosel || !fl_devsel) && multicore_fifo_wready()) {
             multicore_fifo_push_blocking(addr);
             multicore_fifo_push_blocking(flags);
+            multicore_fifo_push_blocking(data);
         }
     }
 
@@ -136,7 +136,7 @@ int main()
             if (multicore_fifo_rvalid()) {
                 uint32_t addr = multicore_fifo_pop_blocking();
                 uint32_t flags = multicore_fifo_pop_blocking();
-                uint32_t data = 0;
+                uint32_t data = multicore_fifo_pop_blocking(); 
                 bool fl_rw = (flags >> 30) & 0x01;
                 bool fl_iosel = (flags >> 27) & 0x01;
                 bool fl_devsel = (flags >> 28) & 0x01;
