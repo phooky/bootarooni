@@ -83,13 +83,18 @@ void initialize_gpio() {
 void core1() {
     PIO pio = pio0;
     const uint addr_sm = 0;
-    uint addr_offset = pio_add_program(pio, &addrbus_program);
+    uint offset = pio_add_program(pio, &addrbus_program);
     io_ro_32 *addr_reg = &pio->rxf[addr_sm];
-    init_addrbus(pio, addr_sm, addr_offset);
-    // uint data_sm = 1;
-    // uint data_offset = pio_add_program(pio, &databus_program);
-    // io_ro_32 *data_reg = &pio->rxf[data_sm];
-    // init_databus(pio, data_sm, data_offset);
+    init_addrbus(pio, addr_sm, offset);
+
+    uint data_read_sm = 1;
+    offset = pio_add_program(pio, &data_read_program);
+    init_data_read(pio, data_read_sm, offset);
+
+    uint data_write_sm = 2;
+    offset = pio_add_program(pio, &data_write_program);
+    init_data_write(pio, data_read_sm, offset);
+
     uint32_t data = 0;
     while (true) {
         while (pio_sm_is_rx_fifo_empty(pio, addr_sm))
@@ -97,21 +102,20 @@ void core1() {
         uint32_t addr = *addr_reg;
         addr = ((addr & 0xAAAA) >> 1) | ((addr & 0x5555) << 1);
         uint32_t flags = *addr_reg;
+        // Offset by 14, so bit 31 = gpio 13, bit 30 = gpio 12, etc
         bool fl_iosel = (flags >> 27) & 0x01;
         bool fl_devsel = (flags >> 28) & 0x01;
-        // Offset by 14, so bit 31 = gpio 13, bit 30 = gpio 12, etc
-        // Let's compile into 000... IOSEL DEVSEL RW
-        // for now let's just isolate RW
-        //flags = (flags >> 30) & 0x01;
-        /*
-        if (!flags) {
-            while (pio_sm_is_rx_fifo_empty(pio, data_sm))
-                tight_loop_contents();
-            data = *data_reg;
-        } else {
-            //if (!pio_sm_is_tx_fifo_empty(pio, data_sm)) { data = 0xfe; } // check for buffered stuff
-            pio_sm_put(pio, data_sm, data << 24);
-        }*/
+        bool fl_rw = (flags >> 30) & 0x01;
+        if (!fl_iosel || !fl_devsel) {
+            if (fl_rw) {
+                // READ FROM expansion card: write to data bus
+                pio_sm_put(pio, data_write_sm, data << 24);
+            } else {
+                // WRITE TO expansion card: read from data bus
+                pio_sm_put(pio, data_read_sm, 0); // Send null message to trigger read
+                data = pio_sm_get_blocking(pio, data_read_sm); // retrieve data
+            }
+        }
         if ((!fl_iosel || !fl_devsel) && multicore_fifo_wready()) {
             multicore_fifo_push_blocking(addr);
             multicore_fifo_push_blocking(flags);
