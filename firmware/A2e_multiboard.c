@@ -92,9 +92,11 @@ void core1() {
     offset = pio_add_program(pio, &data_read_program);
     init_data_read(pio, data_read_sm, offset);
 
+    /*
     uint data_write_sm = 2;
     offset = pio_add_program(pio, &data_write_program);
     init_data_write(pio, data_write_sm, offset);
+    */
 
     uint32_t data = 52;
     while (true) {
@@ -108,7 +110,8 @@ void core1() {
         if (!fl_iosel || !fl_devsel) {
             if (fl_rw) {
                 // READ FROM expansion card: write to data bus
-                pio_sm_put(pio, data_write_sm, data << 24);
+                //pio_sm_put(pio, data_write_sm, data << 24);
+                data = 0xAA; // debug
             } else {
                 // WRITE TO expansion card: read from data bus
                 pio_sm_put(pio, data_read_sm, 0); // Send null message to trigger read

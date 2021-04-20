@@ -28,13 +28,16 @@ skip:
     SET pins, 1             side 0 [15] // set fn to load register
     SET X, 8                side 0 [5]
     SET pins, 0             side 1 [1]  // set fn to shift data
+    // cycles from phi1: 40
 read:
     IN pins, 2              side 0      // read even/odd address bits
     JMP X-- read            side 1 [1]  // shift by 1 
+    // cycles from phi1: 64
+    PUSH                    side 1      // send address to core 1
     WAIT 0 gpio PHI1        side 0      // wait for phi1 to go low
-    PUSH                    side 1      // send address to processor
-    IN pins, 32             side 1      // read in all lines for core1
-    PUSH                    side 0      // send lines to core1
+    IN pins, 32             side 1      // read in all lines for core 1
+    PUSH                    side 0      // send lines to core 1
+    // cycles from phi1: 68
 
 
 % c-sdk {
@@ -64,17 +67,17 @@ static inline void init_addrbus(PIO pio, uint sm, uint offset) {
 .define PHI1 11
 
 // In: DATA_OUT (Base 13, count 1)
-// Set: DATA_OE DATA_FN (Base 2, count 2)
+// Set: DATA_FN (Base 3, count 1)
 // Side set: DATA_CLK (Base 1, count 1)
 .side_set 1
 
-    SET pins, 3         side 0      // Make sure OE is high
+    SET pins, 1         side 0      // Make sure OE is high
     SET X, 8            side 0 
     PULL block          side 0      // Wait until we recieve a message from c1
-    // Timing is iffy, but let's assume we've lost 20 or so cycles from PHI1 low
-    SET pins, 3         side 1 
-    SET pins, 1         side 1 
-rloop: // 25 cycles after phi1 low, data should be valid
+    // We have lost 30+ cycles since PHI1 went low; data is valid now
+    SET pins, 1         side 1
+    SET pins, 0         side 1 [1]
+rloop: 
     IN pins, 1          side 0 [1]
     JMP X-- rloop       side 1 [1]
     PUSH                side 0
@@ -82,7 +85,7 @@ rloop: // 25 cycles after phi1 low, data should be valid
 % c-sdk {
 static inline void init_data_read(PIO pio, uint sm, uint offset) {
     pio_sm_config conf = data_read_program_get_default_config(offset);
-    sm_config_set_set_pins(&conf, 2, 2);
+    sm_config_set_set_pins(&conf, 3, 1);
     sm_config_set_in_pins(&conf, 13);
     sm_config_set_in_shift(&conf, false, false, 0);
     sm_config_set_sideset_pins(&conf, 1);
